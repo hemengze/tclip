@@ -53,6 +53,11 @@ ZEND_DECLARE_MODULE_GLOBALS(tclip)
 static int le_tclip;
 static CascadeClassifier face_cascade;
 
+#if PHP_MAJOR_VERSION < 7
+#define tclip_size_t int
+#else
+#define tclip_size_t size_t
+#endif
 
 /* {{{ tclip_functions[]
  *
@@ -94,7 +99,7 @@ END_EXTERN_C()
  */
 /* Remove comments and fill if you need to have entries in php.ini*/
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("tclip.face_config_path", "", PHP_INI_ALL, OnUpdateString, face_config_path, zend_tclip_globals, tclip_globals)
+    STD_PHP_INI_ENTRY("tclip.face_config_path", "/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml", PHP_INI_ALL, OnUpdateString, face_config_path, zend_tclip_globals, tclip_globals)
 PHP_INI_END()
 
 /* }}} */
@@ -117,7 +122,7 @@ PHP_MINIT_FUNCTION(tclip)
 	/* If you have INI entries, uncomment these lines */
 	REGISTER_INI_ENTRIES();
 	
-	string face_config_path = (TCLIP_G(face_config_path) == "" || TCLIP_G(face_config_path) == NULL)? "/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml" :TCLIP_G(face_config_path);
+	string face_config_path = 0 == strlen(TCLIP_G(face_config_path)) ? "" : TCLIP_G(face_config_path);
 	if( !face_cascade.load( face_config_path ) ){ 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can not load classifier file！%s", face_config_path.c_str());
         return FAILURE; 
@@ -299,7 +304,7 @@ PHP_FUNCTION(tclip)
 	char *source_path = NULL;
 	char *dest_path = NULL;
 	char *watermark_text = NULL;
-	int source_len, dest_len;
+	tclip_size_t source_len, dest_len;
 	long dest_height, dest_width;
 	int result = 0;
 	Mat image;

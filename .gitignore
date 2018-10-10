@@ -28,3 +28,4 @@ run-tests.php
 .DS_Store
 config.h.in~
 soft/tclip
+.vscode/
